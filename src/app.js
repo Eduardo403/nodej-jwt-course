@@ -2,8 +2,10 @@ import express from "express";
 import morgan from "morgan";
 import products from "./routes/products.routes.js";
 import auht from "./routes/auth.routes.js";
+import { createRoles } from "./libs/initeStud.js";
 
 const app = express();
+createRoles();
 app.use(express.json());
 app.use(morgan("dev"));
 
