@@ -18,4 +18,6 @@ app.get("/", (req, res) => {
 });
 app.use("/api/user", auht);
 app.use("/api/products", products);
+
+
 export default app;

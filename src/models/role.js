@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-const roles = new Schema(
+const role = new Schema(
   {
     name: String,
   },
@@ -8,4 +8,4 @@ const roles = new Schema(
     versionKey: false,
   }
 );
-export default model("role", roles);
+export default model("role", role);

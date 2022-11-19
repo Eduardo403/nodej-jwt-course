@@ -2,28 +2,49 @@ import users from "../models/users.js";
 import jwt from "jsonwebtoken";
 import config from "../config.js";
 import role from "../models/role.js";
-const roles = role;
+
 const { sign, verify } = jwt;
 export const signUp = async (req, res) => {
-  const { userName, email, password, role } = req.body;
-  const newUsers = new users({
-    userName,
-    email,
-    password: await users.encryptPassword(password),
-  });
-  const saveUser = await newUsers.save();
-  const token = jwt.sign({ id: saveUser._id }, config.secret, {
-    expiresIn: 86400, //24 horas
-  });
-  if (roles) {
-    const fountRoles = await roles.find({ name: { $in: roles } });
-    newUsers.roles = fountRoles.map((role) => role._id);
-  } else {
-    const role = await roles.find({ name: "user" });
-    newUsers.roles = [role._id];
+  try {
+    const { userName, email, password, roles } = req.body;
+    const newUsers = new users({
+      userName,
+      email,
+      password: await users.encryptPassword(password),
+      roles,
+    });
+    if (roles) {
+      const fountRoles = await role.find({ name: { $in: roles } });
+      newUsers.roles = fountRoles.map((role) => role._id);
+    } else {
+      const userRoles = await role.findOne({ name: "user" });
+      newUsers.roles = [userRoles._id];
+    }
+    const saveUser = await newUsers.save();
+    const token = jwt.sign({ id: saveUser._id }, config.secret, {
+      expiresIn: 86400, //24 horas
+    });
+    console.log(token);
+    res.status(200).json(newUsers);
+  } catch (error) {
+    res.status(400).json(error);
   }
-  res.status(200).json(token);
 };
 export const signin = async (req, res) => {
-  res.json("signin");
+  const emailFonut = await users
+    .findOne({ email: req.body.email })
+    .populate("roles");
+
+  if (!emailFonut) return res.status(404).json({ message: "user not fount " });
+
+  const matchPassword = await users.comparePassword(
+    req.body.password,
+    emailFonut.password
+  );
+  if (!matchPassword)
+    return res.status(401).json({ token: null, message: "password incorect" });
+  const token = jwt.sign({ id: emailFonut._id }, config.secret, {
+    expiresIn: 86400,
+  });
+  res.json(token);
 };
