@@ -2,6 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import products from "./routes/products.routes.js";
 import auht from "./routes/auth.routes.js";
+import userRoute from "./routes/users.routes.js";
 import { createRoles } from "./libs/initeStud.js";
 
 const app = express();
@@ -18,6 +19,6 @@ app.get("/", (req, res) => {
 });
 app.use("/api/user", auht);
 app.use("/api/products", products);
-
+app.use("/api/users", userRoute);
 
 export default app;
